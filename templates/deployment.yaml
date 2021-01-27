@@ -50,6 +50,11 @@ spec:
           env:
             - name: APP_LOG_LEVEL
               value: warning
+      {{- if and .Values.persistence.enabled (eq .Values.persistence.type "pvc") }}
+          volumeMounts:
+            - name: storage
+              mountPath: "/opt/dreamfactory/storage"
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -62,3 +67,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if and .Values.persistence.enabled (eq .Values.persistence.type "pvc") }}
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "dreamfactory.fullname" .) }}
+      {{- end -}}
