@@ -19,12 +19,5 @@ Default DreamFactory behavior can be modified using environment variables manage
       pullPolicy: Always
       tag: "4.3.1"
       env:
-        app_log_level: debug
+        APP_LOG_LEVEL: debug
 
-Next, open the `templates/deployment.yaml` file and add an `env` dictionary to the parent `container` dictionary, like so:
-
-    containers:
-    ...
-    env:
-        - name: APP_LOG_LEVEL
-        value: warning
