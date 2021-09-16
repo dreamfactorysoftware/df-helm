@@ -48,8 +48,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: APP_LOG_LEVEL
-              value: warning
+            {{- range $key, $value := .Values.image.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

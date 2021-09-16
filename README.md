@@ -17,7 +17,7 @@ Default DreamFactory behavior can be modified using environment variables manage
     image:
       repository: dreamfactorysoftware/dreamfactory
       pullPolicy: Always
-      tag: "4.3.1"
+      tag: "4.9.0"
       env:
         app_log_level: debug
 
