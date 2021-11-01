@@ -8,7 +8,7 @@ image:
   repository: dreamfactorysoftware/dreamfactory
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "4.9.0"
+  tag: "latest"
   env:
     APP_LOG_LEVEL: debug
 
