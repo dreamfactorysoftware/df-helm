@@ -31,8 +31,8 @@ Next, open the `templates/deployment.yaml` file and add an `env` dictionary to t
 
 ## Exposing External IP with Ingress 
 
-kubectl expose deployment dreamfactory --type=LoadBalancer --name=<service-name>
+`$ kubectl expose deployment dreamfactory --type=LoadBalancer --name=<service-name>`
 
 After a minute you can then run the following command to see the external IP.
 
-kubectl get services
+`$ kubectl get services`
