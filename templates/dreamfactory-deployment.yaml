@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dreamfactory.fullname" . }}
+  labels:
+    app: {{ include "dreamfactory.fullname" . }}
+spec:
+  replicas: {{ .Values.dreamfactory.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "dreamfactory.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "dreamfactory.fullname" . }}
+    spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox
+          command: ['sh', '-c', '
+            timeout=60;
+            counter=0;
+            until nc -z {{ include "mysql.fullname" . }} 3306 || [ $counter -eq $timeout ]; do
+              echo "Waiting for MySQL (attempt $counter/$timeout)";
+              sleep 1;
+              counter=$((counter+1));
+            done;
+            if [ $counter -eq $timeout ]; then
+              echo "Timeout reached. MySQL might not be ready.";
+              exit 1;
+            fi
+          ']
+      containers:
+        - name: dreamfactory
+          image: "{{ .Values.dreamfactory.image.repository }}:{{ .Values.dreamfactory.image.tag }}"
+          ports:
+            - containerPort: 80
+          resources:
+            {{- toYaml .Values.dreamfactory.resources | nindent 12 }}
+          env:
+            - name: DB_CONNECTION
+              value: mysql
+            - name: DB_HOST
+              value: {{ include "mysql.fullname" . }}
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: dreamfactory
+            - name: DB_USERNAME
+              value: root
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mysql.fullname" . }}-secret
+                  key: mysql-root-password
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dreamfactory.fullname" . }}-secret
+                  key: app-key
+            - name: DB_DRIVER
+              value: mysql
+            - name: CACHE_DRIVER
+              value: redis
+            - name: CACHE_HOST
+              value: {{ include "redis.fullname" . }}
+            - name: CACHE_PORT
+              value: "6379"
+            - name: DF_INSTALL
+              value: Helm
+            # Add the environment variables for logging configuration
+            - name: APP_LOG_LEVEL
+              value: debug
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+

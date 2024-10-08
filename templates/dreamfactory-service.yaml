@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dreamfactory.fullname" . }}
+spec:
+  type: {{ .Values.dreamfactory.service.type }}
+  ports:
+    - port: {{ .Values.dreamfactory.service.port }}
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "dreamfactory.fullname" . }}
+

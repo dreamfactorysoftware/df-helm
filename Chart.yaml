@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dreamfactory
+description: A Helm chart for deploying DreamFactory with MySQL and Redis
+type: application
+version: 0.1.2
+appVersion: "6.3.0"

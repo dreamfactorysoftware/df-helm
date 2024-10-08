@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "dreamfactory.fullname" . }}-post-install
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: {{ include "dreamfactory.fullname" . }}-post-install
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: post-install-job
+          image: "{{ .Values.dreamfactory.image.repository }}:{{ .Values.dreamfactory.image.tag }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              php artisan migrate --force
+              php artisan db:seed --force
+          env:
+            # Include all the environment variables from the main DreamFactory deployment
+            {{- range $key, $value := .Values.dreamfactory.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
