@@ -30,7 +30,7 @@ href="https://wiki.dreamfactory.com">Docs</a>
 <a name="installation"></a>
 ## Installing the DreamFactory Helm Chart
 
-### 1) Clone the df-docker repo
+### 1) Clone the df-helm repo
 `cd ~/repos` (or wherever you want the clone of the repo to be)  
 `git clone https://github.com/dreamfactorysoftware/df-helm.git`  
 `cd df-helm`
