@@ -1,0 +1,24 @@
+{{- if .Values.dreamfactory.ingress.enabled }}
+{{- if and (eq .Values.dreamfactory.ingress.ingressClass "gce") (not .Values.dreamfactory.ingress.tls) }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ include "dreamfactory.fullname" . }}-managed-cert
+spec:
+  domains:
+  {{- range .Values.dreamfactory.ingress.hosts }}
+    - {{ . }}
+  {{- end }}
+{{- end}}
+
+{{- if eq .Values.dreamfactory.ingress.ingressClass "gce"}}
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: {{ include "dreamfactory.fullname" . }}-ssl-redirect
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: MOVED_PERMANENTLY_DEFAULT
+{{- end}}
+{{- end}}

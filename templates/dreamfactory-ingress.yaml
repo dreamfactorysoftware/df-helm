@@ -1,0 +1,35 @@
+{{- if .Values.dreamfactory.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.dreamfactory.ingress.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.dreamfactory.ingress.ingressClass }}
+  ingressClassName: {{ .Values.dreamfactory.ingress.ingressClass }}
+  {{- end }}
+  {{- if .Values.dreamfactory.ingress.tls }}
+  tls:
+  - hosts:
+    {{- range .Values.dreamfactory.ingress.hosts }}
+    - {{ . }}
+    {{- end }}
+    secretName: {{ include "dreamfactory.fullname" $ }}-tls
+  {{- end}}
+  rules:
+  {{- range .Values.dreamfactory.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /
+        pathType: {{ $.Values.dreamfactory.ingress.pathType }}
+        backend:
+          service:
+            name: {{ include "dreamfactory.fullname" $ }}
+            port:
+              number: 80
+  {{- end }}
+{{- end }}

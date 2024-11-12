@@ -46,11 +46,138 @@ Update the MySQL root password value to a secure password
 
 You can expect to see 2 DreamFactory pods, 1 MySQL pod for system config storage, and 1 Redis pod for caching.
 
-### 5) Expose the pod in the browser
+### 5) Access the Admin UI (Without Ingress)
 `kubectl port-forward svc/dreamfactory-dreamfactory 8080:80`
-
-### 6) Access the Admin UI
 Go to `127.0.0.1:8080` in your browser. It will take some time upon building, but you will be asked to create your first admin user.
+
+### 6) Access the Admin UI (Ingress)
+To access DreamFactory through an ingress controller, update the ingress section in your `values.yaml`:
+
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: nginx  # or your preferred ingress controller
+    annotations:
+      # Add any required annotations for your ingress controller
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod  # if using cert-manager
+    hosts:
+      - your-domain.example.com
+    tls: true
+```
+
+Then apply the configuration (if dreamfactory has already been installed):
+```bash
+helm upgrade dreamfactory . -f values.yaml
+```
+
+Example configurations for common use cases:
+
+#### Basic HTTP Setup (Existing NGINX Ingress with no TLS)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: nginx
+    hosts:
+      - df.example.com
+    tls: false
+    pathType: Prefix
+```
+
+#### HTTPS with TLS (Existing NGINX Ingress with TLS)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-issuer-name
+    hosts:
+      - df.example.com
+    tls: true
+    pathType: Prefix
+```
+
+#### AWS ALB Setup (AWS Load Balancer Controller needs to be installed) ( Instructions  <a href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/deploy/installation/">Here</a>)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+      alb.ingress.kubernetes.io/certificate-arn: '' #Certificate needs to exist in AWS Certificate Manager, ALB does not work with letsencrypt
+      # ALB also does auto discovery which should be supported out of the box with the ingress definition based on the documentation found at https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/cert_discovery/
+  hosts:
+      - df.example.com
+    tls: false
+    pathType: Prefix
+```
+
+#### Contour Ingress Setup
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: contour
+    annotations:
+      ingress.kubernetes.io/force-ssl-redirect: "true"
+      projectcontour.io/max-connections: "1024"
+      projectcontour.io/response-timeout: 30s
+      projectcontour.io/websocket-routes: /
+    hosts:
+      - df.example.com
+    tls: true
+    pathType: Prefix (could be ImplementationSpecific depends on your setup)
+```
+
+#### GCP Ingress Setup (Google Managed Certificates)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: gce
+    annotations:
+      kubernetes.io/ingress.global-static-ip-name: "dreamfactory-ip"  # Optional: if you want a static IP
+      # Still need frontend config for SSL redirect
+      networking.gke.io/v1beta1.FrontendConfig: "dreamfactory-ssl-redirect"
+      networking.gke.io/managed-certificates: "dreamfactory-cert"
+    hosts:
+      - df.example.com
+    tls: false
+    pathType: Prefix
+```
+
+#### GCP Ingress Setup (LetsEncrypt)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: gce
+    annotations:
+      kubernetes.io/ingress.global-static-ip-name: "dreamfactory-ip"  # Optional: if you want a static IP
+      # Still need frontend config for SSL redirect
+      networking.gke.io/v1beta1.FrontendConfig: "dreamfactory-ssl-redirect"
+      cert-manager.io/cluster-issuer: letsencrypt-issuer-name
+    hosts:
+      - df.example.com
+    tls: true
+    pathType: Prefix
+```
+
+
+After applying the configuration:
+1. Wait for the ingress to be created: `kubectl get ingress`
+2. Ensure your DNS is configured to point to the ingress controller's address
+3. Access DreamFactory at the configured host (e.g., https://df.example.com)
+
+**Note**: TLS configuration requires either cert-manager installed in your cluster or manually created TLS secrets.
 
 <a name="app-key"></a>
 ## Obtaining the APP Key value
