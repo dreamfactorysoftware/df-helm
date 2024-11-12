@@ -1,4 +1,13 @@
 dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: ""
+    annotations: {}
+    hosts:
+      - example.dreamfactory.com
+    tls: true
+
+
   image:
     repository: dreamfactorysoftware/dreamfactory
     tag: latest
