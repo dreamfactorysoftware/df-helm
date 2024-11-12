@@ -93,7 +93,7 @@ dreamfactory:
     enabled: true
     ingressClass: nginx
     annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-issuer-name
+      cert-manager.io/cluster-issuer: letsencrypt-issuer-name
     hosts:
       - df.example.com
     tls: true
@@ -107,14 +107,14 @@ dreamfactory:
     enabled: true
     ingressClass: alb
     annotations:
-        alb.ingress.kubernetes.io/scheme: internet-facing
-        alb.ingress.kubernetes.io/target-type: ip
-        alb.ingress.kubernetes.io/ssl-redirect: '443'
-        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
-        alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
-        alb.ingress.kubernetes.io/certificate-arn: '' #Certificate needs to exist in AWS Certificate Manager, ALB does not work with letsencrypt
-        # ALB also does auto discovery which should be supported out of the box with the ingress definition based on the documentation found <a href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/cert_discovery/">Here</a>) 
-    hosts:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+      alb.ingress.kubernetes.io/certificate-arn: '' #Certificate needs to exist in AWS Certificate Manager, ALB does not work with letsencrypt
+      # ALB also does auto discovery which should be supported out of the box with the ingress definition based on the documentation found <a href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/cert_discovery/">Here</a>) 
+  hosts:
       - df.example.com
     tls: false
     pathType: Prefix
@@ -127,15 +127,50 @@ dreamfactory:
     enabled: true
     ingressClass: contour
     annotations:
-        ingress.kubernetes.io/force-ssl-redirect: "true"
-        projectcontour.io/max-connections: "1024"
-        projectcontour.io/response-timeout: 30s
-        projectcontour.io/websocket-routes: /
+      ingress.kubernetes.io/force-ssl-redirect: "true"
+      projectcontour.io/max-connections: "1024"
+      projectcontour.io/response-timeout: 30s
+      projectcontour.io/websocket-routes: /
     hosts:
       - df.example.com
     tls: true
     pathType: Prefix (could be ImplementationSpecific depends on your setup)
 ```
+
+#### GCP Ingress Setup (Google Managed Certificates)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: gce
+    annotations:
+      kubernetes.io/ingress.global-static-ip-name: "dreamfactory-ip"  # Optional: if you want a static IP
+      # Still need frontend config for SSL redirect
+      networking.gke.io/v1beta1.FrontendConfig: "dreamfactory-ssl-redirect"
+      networking.gke.io/managed-certificates: "dreamfactory-cert"
+    hosts:
+      - df.example.com
+    tls: false
+    pathType: Prefix
+```
+
+#### GCP Ingress Setup (LetsEncrypt)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: gce
+    annotations:
+      kubernetes.io/ingress.global-static-ip-name: "dreamfactory-ip"  # Optional: if you want a static IP
+      # Still need frontend config for SSL redirect
+      networking.gke.io/v1beta1.FrontendConfig: "dreamfactory-ssl-redirect"
+      cert-manager.io/cluster-issuer: letsencrypt-issuer-name
+    hosts:
+      - df.example.com
+    tls: true
+    pathType: Prefix
+```
+
 
 After applying the configuration:
 1. Wait for the ingress to be created: `kubectl get ingress`
