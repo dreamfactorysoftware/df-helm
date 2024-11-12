@@ -113,7 +113,7 @@ dreamfactory:
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
       alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
       alb.ingress.kubernetes.io/certificate-arn: '' #Certificate needs to exist in AWS Certificate Manager, ALB does not work with letsencrypt
-      # ALB also does auto discovery which should be supported out of the box with the ingress definition based on the documentation found <a href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/cert_discovery/">Here</a>) 
+      # ALB also does auto discovery which should be supported out of the box with the ingress definition based on the documentation found at https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/cert_discovery/
   hosts:
       - df.example.com
     tls: false
