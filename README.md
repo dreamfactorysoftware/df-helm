@@ -46,13 +46,11 @@ Update the MySQL root password value to a secure password
 
 You can expect to see 2 DreamFactory pods, 1 MySQL pod for system config storage, and 1 Redis pod for caching.
 
-### 5) Expose the pod in the browser
+### 5) Access the Admin UI (Without Ingress)
 `kubectl port-forward svc/dreamfactory-dreamfactory 8080:80`
-
-### 6) Access the Admin UI (Without Ingress)
 Go to `127.0.0.1:8080` in your browser. It will take some time upon building, but you will be asked to create your first admin user.
 
-### 7) Access the Admin UI (Ingress)
+### 6) Access the Admin UI (Ingress)
 To access DreamFactory through an ingress controller, update the ingress section in your `values.yaml`:
 
 ```yaml
