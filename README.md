@@ -93,14 +93,14 @@ dreamfactory:
     enabled: true
     ingressClass: nginx
     annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/cluster-issuer: letsencrypt-issuer-name
     hosts:
       - df.example.com
     tls: true
     pathType: Prefix
 ```
 
-#### AWS ALB Setup
+#### AWS ALB Setup (AWS Load Balancer Controller needs to be installed) ( Instructions  <a href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/deploy/installation/">Here</a>)
 ```yaml
 dreamfactory:
   ingress:
@@ -111,9 +111,12 @@ dreamfactory:
         alb.ingress.kubernetes.io/target-type: ip
         alb.ingress.kubernetes.io/ssl-redirect: '443'
         alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+        alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+        alb.ingress.kubernetes.io/certificate-arn: '' #Certificate needs to exist in AWS Certificate Manager, ALB does not work with letsencrypt
+        # ALB also does auto discovery which should be supported out of the box with the ingress definition based on the documentation found <a href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/cert_discovery/">Here</a>) 
     hosts:
       - df.example.com
-    tls: true
+    tls: false
     pathType: Prefix
 ```
 
