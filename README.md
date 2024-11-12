@@ -49,8 +49,97 @@ You can expect to see 2 DreamFactory pods, 1 MySQL pod for system config storage
 ### 5) Expose the pod in the browser
 `kubectl port-forward svc/dreamfactory-dreamfactory 8080:80`
 
-### 6) Access the Admin UI
+### 6) Access the Admin UI (Without Ingress)
 Go to `127.0.0.1:8080` in your browser. It will take some time upon building, but you will be asked to create your first admin user.
+
+### 7) Access the Admin UI (Ingress)
+To access DreamFactory through an ingress controller, update the ingress section in your `values.yaml`:
+
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: nginx  # or your preferred ingress controller
+    annotations:
+      # Add any required annotations for your ingress controller
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod  # if using cert-manager
+    hosts:
+      - your-domain.example.com
+    tls: true
+```
+
+Then apply the configuration (if dreamfactory has already been installed):
+```bash
+helm upgrade dreamfactory . -f values.yaml
+```
+
+Example configurations for common use cases:
+
+#### Basic HTTP Setup (Existing NGINX Ingress with no TLS)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: nginx
+    hosts:
+      - df.example.com
+    tls: false
+    pathType: Prefix
+```
+
+#### HTTPS with TLS (Existing NGINX Ingress with TLS)
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: nginx
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - df.example.com
+    tls: true
+    pathType: Prefix
+```
+
+#### AWS ALB Setup
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: alb
+    annotations:
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+    hosts:
+      - df.example.com
+    tls: true
+    pathType: Prefix
+```
+
+#### Contour Ingress Setup
+```yaml
+dreamfactory:
+  ingress:
+    enabled: true
+    ingressClass: contour
+    annotations:
+        ingress.kubernetes.io/force-ssl-redirect: "true"
+        projectcontour.io/max-connections: "1024"
+        projectcontour.io/response-timeout: 30s
+        projectcontour.io/websocket-routes: /
+    hosts:
+      - df.example.com
+    tls: true
+    pathType: Prefix (could be ImplementationSpecific depends on your setup)
+```
+
+After applying the configuration:
+1. Wait for the ingress to be created: `kubectl get ingress`
+2. Ensure your DNS is configured to point to the ingress controller's address
+3. Access DreamFactory at the configured host (e.g., https://df.example.com)
+
+**Note**: TLS configuration requires either cert-manager installed in your cluster or manually created TLS secrets.
 
 <a name="app-key"></a>
 ## Obtaining the APP Key value

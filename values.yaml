@@ -6,6 +6,7 @@ dreamfactory:
     hosts:
       - example.dreamfactory.com
     tls: true
+    pathType: Prefix
 
 
   image:
