@@ -71,6 +71,10 @@ spec:
             # Add the environment variables for logging configuration
             - name: APP_LOG_LEVEL
               value: debug
+            {{- if .Values.dreamfactory.env.licensekey }}
+            - name: DF_LICENSE_KEY
+              value: {{ .Values.dreamfactory.env.licensekey }}
+            {{- end }}               
           readinessProbe:
             httpGet:
               path: /
