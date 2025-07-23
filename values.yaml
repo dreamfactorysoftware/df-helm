@@ -11,7 +11,7 @@ dreamfactory:
     licensekey: {} # Populate if you have a license key
 
   image:
-    repository: dreamfactorysoftware/dreamfactory
+    repository: dreamfactorysoftware/df-docker
     tag: latest
   replicaCount: 2
   service:
