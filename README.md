@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-    Helm Chart for DreamFactory 6.x
+    Helm Chart for DreamFactory 7.x
 </p>
 
 <p align="center">
